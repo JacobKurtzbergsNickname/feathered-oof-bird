@@ -19,7 +19,6 @@
     
     <properties>
         <java.version>17</java.version>
-        <spring-ai.version>1.0.0-M4</spring-ai.version>
     </properties>
     
     <dependencies>
@@ -60,11 +59,13 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         
-        <!-- Spring AI (for generative AI support) -->
+        <!-- Spring AI (for generative AI support) - Commented out due to repository access issues -->
+        <!-- Uncomment when Spring AI repository is accessible
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
         </dependency>
+        -->
         
         <!-- Lombok -->
         <dependency>
@@ -81,6 +82,8 @@
         </dependency>
     </dependencies>
     
+    <!-- Dependency Management - Commented out Spring AI BOM due to repository access issues -->
+    <!--
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -92,6 +95,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    -->
     
     <build>
         <plugins>
@@ -110,6 +114,8 @@
         </plugins>
     </build>
     
+    <!-- Repositories - Commented out Spring milestones due to access issues -->
+    <!--
     <repositories>
         <repository>
             <id>spring-milestones</id>
@@ -120,4 +126,5 @@
             </snapshots>
         </repository>
     </repositories>
+    -->
 </project>
