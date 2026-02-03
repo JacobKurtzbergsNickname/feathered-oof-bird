@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,12 +47,14 @@ public class TransactionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('SCOPE_write:transactions') or hasAuthority('write:transactions')")
     public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody Transaction transaction) {
         Transaction createdTransaction = transactionService.createTransaction(transaction);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTransaction);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_write:transactions') or hasAuthority('write:transactions')")
     public ResponseEntity<Transaction> updateTransaction(
             @PathVariable Long id,
             @Valid @RequestBody Transaction transaction) {
@@ -64,6 +67,7 @@ public class TransactionController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_write:transactions') or hasAuthority('write:transactions')")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
         transactionService.deleteTransaction(id);
         return ResponseEntity.noContent().build();
