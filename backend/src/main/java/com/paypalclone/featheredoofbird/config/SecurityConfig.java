@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
@@ -19,7 +21,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,6 +35,14 @@ public class SecurityConfig {
     public SecurityConfig(
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
             @Value("${auth0.audience}") String audience) {
+        if (issuerUri == null || issuerUri.isBlank() || issuerUri.contains("YOUR_TENANT")) {
+            throw new IllegalArgumentException(
+                    "Invalid issuer-uri configuration. Please set AUTH0_ISSUER_URI environment variable.");
+        }
+        if (audience == null || audience.isBlank() || audience.contains("your-api-audience")) {
+            throw new IllegalArgumentException(
+                    "Invalid audience configuration. Please set AUTH0_AUDIENCE environment variable.");
+        }
         this.issuerUri = issuerUri;
         this.audience = audience;
     }
@@ -59,7 +68,9 @@ public class SecurityConfig {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withIssuerLocation(issuerUri).build();
         OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(issuerUri);
         OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(audience);
-        jwtDecoder.setJwtValidator(new DelegatingJwtValidator(issuerValidator, audienceValidator));
+        OAuth2TokenValidator<Jwt> combinedValidator = new DelegatingOAuth2TokenValidator<>(
+                issuerValidator, audienceValidator);
+        jwtDecoder.setJwtValidator(combinedValidator);
         return jwtDecoder;
     }
 
@@ -89,33 +100,12 @@ public class SecurityConfig {
 
         @Override
         public OAuth2TokenValidatorResult validate(Jwt token) {
-            if (token.getAudience().contains(audience)) {
+            Collection<String> tokenAudience = token.getAudience();
+            if (tokenAudience != null && tokenAudience.contains(audience)) {
                 return OAuth2TokenValidatorResult.success();
             }
             return OAuth2TokenValidatorResult.failure(
                     new OAuth2Error("invalid_token", "Required audience is missing", null));
-        }
-    }
-
-    private static class DelegatingJwtValidator implements OAuth2TokenValidator<Jwt> {
-
-        private final OAuth2TokenValidator<Jwt> issuerValidator;
-        private final OAuth2TokenValidator<Jwt> audienceValidator;
-
-        private DelegatingJwtValidator(
-                OAuth2TokenValidator<Jwt> issuerValidator,
-                OAuth2TokenValidator<Jwt> audienceValidator) {
-            this.issuerValidator = issuerValidator;
-            this.audienceValidator = audienceValidator;
-        }
-
-        @Override
-        public OAuth2TokenValidatorResult validate(Jwt token) {
-            OAuth2TokenValidatorResult issuerResult = issuerValidator.validate(token);
-            if (issuerResult.hasErrors()) {
-                return issuerResult;
-            }
-            return audienceValidator.validate(token);
         }
     }
 }

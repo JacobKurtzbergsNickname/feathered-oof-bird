@@ -2,6 +2,7 @@ package com.paypalclone.featheredoofbird.controller;
 
 import java.util.Map;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin")
 public class AdminController {
 
+    @PreAuthorize("hasAuthority('SCOPE_admin:all')")
     @GetMapping("/status")
     public Map<String, Object> status() {
         return Map.of("status", "ok");
