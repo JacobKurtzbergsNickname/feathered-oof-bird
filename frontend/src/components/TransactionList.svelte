@@ -1,14 +1,15 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { Table, Button, Spinner, Alert } from 'flowbite-svelte';
   import { transactionService } from '../services/transactionService';
+  import type { Transaction } from '../lib/types';
 
-  export let onEdit;
-  export let onDelete;
+  export let onEdit: (transaction: Transaction) => void;
+  export let onDelete: (id: string) => void;
 
-  let transactions = [];
+  let transactions: Transaction[] = [];
   let loading = true;
-  let error = null;
+  let error: string | null = null;
 
   onMount(async () => {
     await loadTransactions();
@@ -20,17 +21,17 @@
       error = null;
       transactions = await transactionService.getAll();
     } catch (err) {
-      error = err.message;
+      error = err instanceof Error ? err.message : 'Unable to load transactions.';
     } finally {
       loading = false;
     }
   }
 
-  function formatDate(dateString) {
+  function formatDate(dateString: string) {
     return new Date(dateString).toLocaleString();
   }
 
-  function formatAmount(amount, currency) {
+  function formatAmount(amount: number, currency: string) {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency || 'USD',

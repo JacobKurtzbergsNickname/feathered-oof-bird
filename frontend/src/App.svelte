@@ -1,19 +1,24 @@
-<script>
+<script lang="ts">
   import { Button, Modal } from 'flowbite-svelte';
   import TransactionList from './components/TransactionList.svelte';
   import TransactionForm from './components/TransactionForm.svelte';
+  import type { Transaction } from './lib/types';
   import './app.css';
 
+  type TransactionListHandle = {
+    loadTransactions: () => Promise<void>;
+  };
+
   let showModal = false;
-  let editingTransaction = null;
-  let transactionListRef;
+  let editingTransaction: Transaction | null = null;
+  let transactionListRef: TransactionListHandle | null = null;
 
   function openCreateModal() {
     editingTransaction = null;
     showModal = true;
   }
 
-  function openEditModal(transaction) {
+  function openEditModal(transaction: Transaction) {
     editingTransaction = transaction;
     showModal = true;
   }
@@ -30,8 +35,8 @@
     }
   }
 
-  async function handleDelete(id) {
-    if (confirm('Are you sure you want to delete this transaction?')) {
+  async function handleDelete(id: string) {
+    if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
         const { transactionService } = await import('./services/transactionService');
         await transactionService.delete(id);
@@ -39,7 +44,8 @@
           await transactionListRef.loadTransactions();
         }
       } catch (err) {
-        alert('Failed to delete transaction: ' + err.message);
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        window.alert('Failed to delete transaction: ' + message);
       }
     }
   }
