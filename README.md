@@ -14,6 +14,7 @@ This is a full-stack PayPal-like transaction management system built with:
 
 - ✅ Transaction CRUD operations (Create, Read, Update, Delete)
 - ✅ REST API with Spring Boot
+- ✅ Auth0-backed JWT protection for `/api/**`
 - ✅ Responsive UI with Svelte and Flowbite-Svelte
 - ✅ PostgreSQL for relational data storage
 - ✅ MongoDB for document storage
@@ -125,6 +126,10 @@ feathered-oof-bird/
 - `PUT /api/transactions/{id}` - Update a transaction
 - `DELETE /api/transactions/{id}` - Delete a transaction
 
+### Admin
+
+- `GET /api/admin/status` - Admin-only status check (requires `admin:all` scope)
+
 ### Transaction Model
 
 ```json
@@ -155,6 +160,10 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/paypal_clone
 spring.datasource.username=postgres
 spring.datasource.password=postgres
 
+# Auth0 JWT Resource Server
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://YOUR_TENANT.eu.auth0.com/
+auth0.audience=https://your-api-audience
+
 # MongoDB
 spring.data.mongodb.uri=mongodb://localhost:27017/paypal_clone
 
@@ -164,6 +173,39 @@ spring.data.redis.port=6379
 
 # Spring AI (Uncomment and add your API key)
 # spring.ai.openai.api-key=${OPENAI_API_KEY}
+```
+
+## Auth0 JWT Resource Server
+
+This API is configured as a stateless Auth0-backed resource server. `/api/**` endpoints require a valid Auth0 access token, while `/actuator/health` and `/public/**` remain open.
+
+### Auth0 Setup Checklist
+
+1. **Create an API**
+   - Auth0 Dashboard → Applications → APIs → Create API
+   - Set **Identifier** to match `auth0.audience`.
+2. **(Optional) Enable RBAC**
+   - Enable RBAC and "Add Permissions in the Access Token".
+   - Create permissions like `read:transactions` or `write:transactions`.
+3. **Request a Token**
+   - Ensure the token uses `audience` = your API Identifier and include required scopes.
+
+### Smoke Tests
+
+```bash
+# 1) Public health
+curl http://localhost:8080/actuator/health
+
+# 2) Authenticated GET (requires a valid Auth0 access token)
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/transactions
+
+# 3) Protected write (requires write scope or permission)
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"sender":"Ada","receiver":"Linus","amount":42,"currency":"USD","status":"PENDING"}' \
+  http://localhost:8080/api/transactions
+
+# 4) Admin-only endpoint (requires admin:all scope)
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/admin/status
 ```
 
 ### Frontend Configuration
