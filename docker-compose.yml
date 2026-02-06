@@ -1,100 +1,104 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: paypal-postgres
+  ooftish-postgres:
+    image: postgres:17-alpine
+    container_name: ooftish-postgres
     environment:
-      POSTGRES_DB: paypal_clone
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ooftish-postgres
+      POSTGRES_PASSWORD: Y0uYuM40D3Q14nN140!
+      POSTGRES_DB: ooftish_postgres
     ports:
-      - "5432:5432"
+      - "5532:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     networks:
-      - paypal-network
+      - ooftish-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ooftish-postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  mongodb:
-    image: mongo:7-jammy
-    container_name: paypal-mongo
+  ooftish-mongo:
+    image: mongo:7
+    container_name: ooftish-mongo
     environment:
-      MONGO_INITDB_DATABASE: paypal_clone
+      MONGO_INITDB_ROOT_USERNAME: ooftish-mongo
+      MONGO_INITDB_ROOT_PASSWORD: Y0uYuM40D3Q14nN140!
+      MONGO_INITDB_DATABASE: ooftish_mongo
     ports:
-      - "27017:27017"
+      - "27020:27017"
     volumes:
-      - mongo-data:/data/db
+      - mongodata:/data/db
     networks:
-      - paypal-network
+      - ooftish-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--username", "ooftish-mongo", "--password", "Y0uYuM40D3Q14nN140!", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  valkey:
+  ooftish-valkey:
     image: valkey/valkey:7.2-alpine
-    container_name: paypal-valkey
+    container_name: ooftish-valkey
+    command: ["valkey-server", "--requirepass", "Y0uYuM40D3Q14nN140!"]
     ports:
       - "6379:6379"
     volumes:
-      - valkey-data:/data
+      - valkeydata:/data
     networks:
-      - paypal-network
+      - ooftish-network
     healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
+      test: ["CMD", "valkey-cli", "-a", "Y0uYuM40D3Q14nN140!", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  backend:
+  ooftish-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: paypal-backend
+    container_name: ooftish-backend
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/paypal_clone
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/paypal_clone
-      SPRING_DATA_REDIS_HOST: valkey
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ooftish-postgres:5532/ooftish_postgres
+      SPRING_DATASOURCE_USERNAME: ooftish-postgres
+      SPRING_DATASOURCE_PASSWORD: Y0uYuM40D3Q14nN140!
+      SPRING_DATA_MONGODB_URI: mongodb://ooftish-mongo:Y0uYuM40D3Q14nN140!@ooftish-mongo:27017/ooftish_mongo
+      SPRING_DATA_REDIS_HOST: ooftish-valkey
       SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: Y0uYuM40D3Q14nN140!
     depends_on:
-      postgres:
+      ooftish-postgres:
         condition: service_healthy
-      mongodb:
+      ooftish-mongo:
         condition: service_healthy
-      valkey:
+      ooftish-valkey:
         condition: service_healthy
     networks:
-      - paypal-network
+      - ooftish-network
+    profiles: ["prod"]
 
-  frontend:
+  ooftish-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: paypal-frontend
+    container_name: ooftish-frontend
     ports:
       - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:8080
     depends_on:
-      - backend
+      - ooftish-backend
     networks:
-      - paypal-network
+      - ooftish-network
+    profiles: ["prod"]
 
 volumes:
-  postgres-data:
-  mongo-data:
-  valkey-data:
+  pgdata:
+  mongodata:
+  valkeydata:
 
 networks:
-  paypal-network:
+  ooftish-network:
     driver: bridge

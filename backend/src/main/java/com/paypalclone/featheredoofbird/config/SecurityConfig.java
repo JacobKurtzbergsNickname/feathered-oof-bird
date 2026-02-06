@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,22 +35,39 @@ public class SecurityConfig {
     private final String issuerUri;
     private final String audience;
 
+    @Autowired(required = false)
+    private DevAuthenticationProvider devAuthenticationProvider;
+
     public SecurityConfig(
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
             @Value("${auth0.audience}") String audience) {
-        if (issuerUri == null || issuerUri.isBlank() || issuerUri.contains("YOUR_TENANT")) {
-            throw new IllegalArgumentException(
-                    "Invalid issuer-uri configuration. Please set AUTH0_ISSUER_URI environment variable.");
-        }
-        if (audience == null || audience.isBlank() || audience.contains("your-api-audience")) {
-            throw new IllegalArgumentException(
-                    "Invalid audience configuration. Please set AUTH0_AUDIENCE environment variable.");
-        }
         this.issuerUri = issuerUri;
         this.audience = audience;
     }
 
+    /**
+     * Spring Security looks for a SecurityFilterChain bean by type at runtime.
+     * This method is not called directly in code, but is required for configuration.
+     */
     @Bean
+    @Profile("dev")
+    SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/public/**", "/actuator/health").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("USER")
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().denyAll())
+            .authenticationProvider(devAuthenticationProvider)
+            .httpBasic();
+        return http.build();
+    }
+
+    @Bean
+    @Profile("!dev")
+    @SuppressWarnings("unused")
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -59,11 +79,16 @@ public class SecurityConfig {
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt
                         .jwtAuthenticationConverter(auth0JwtAuthConverter())));
-
         return http.build();
     }
 
+    /**
+     * Spring Security looks for a JwtDecoder bean by type at runtime.
+     * This method is not called directly in code, but is required for configuration.
+     */
     @Bean
+    @Profile("!dev")
+    @SuppressWarnings("unused")
     JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withIssuerLocation(issuerUri).build();
         OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(issuerUri);
