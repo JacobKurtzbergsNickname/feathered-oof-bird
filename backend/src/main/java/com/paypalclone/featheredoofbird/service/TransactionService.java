@@ -47,17 +47,7 @@ public class TransactionService {
 
     @Transactional
     public Transaction updateTransaction(Long id, Transaction updatedTransaction) {
-        return transactionRepository.findById(id)
-                .map(transaction -> {
-                    transaction.setSender(updatedTransaction.getSender());
-                    transaction.setReceiver(updatedTransaction.getReceiver());
-                    transaction.setAmount(updatedTransaction.getAmount());
-                    transaction.setCurrency(updatedTransaction.getCurrency());
-                    transaction.setDescription(updatedTransaction.getDescription());
-                    transaction.setStatus(updatedTransaction.getStatus());
-                    return transactionRepository.save(transaction);
-                })
-                .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id));
+        return transactionRepository.update(id, updatedTransaction);
     }
 
     @Transactional
