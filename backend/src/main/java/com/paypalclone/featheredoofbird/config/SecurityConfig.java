@@ -3,14 +3,14 @@ package com.paypalclone.featheredoofbird.config;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -35,7 +36,10 @@ public class SecurityConfig {
     private final String audience;
 
     @Autowired(required = false)
-    private DevAuthenticationProvider devAuthenticationProvider;
+    private JwtAuthenticationProvider jwtAuthenticationProvider;
+
+    @Autowired(required = false)
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfig(
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
@@ -50,6 +54,7 @@ public class SecurityConfig {
      */
     @Bean
     @Profile("dev")
+    @SuppressWarnings("unused")
     SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
@@ -59,7 +64,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("USER")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().denyAll())
-            .authenticationProvider(devAuthenticationProvider)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(jwtAuthenticationProvider)
             .httpBasic(httpBasic -> httpBasic.disable());
         return http.build();
     }
