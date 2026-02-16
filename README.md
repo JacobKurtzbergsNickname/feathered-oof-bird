@@ -16,8 +16,8 @@ This is a full-stack PayPal-like transaction management system built with:
 - ✅ REST API with Spring Boot
 - ✅ Auth0-backed JWT protection for `/api/**`
 - ✅ Responsive UI with Svelte and Flowbite-Svelte
-- ✅ PostgreSQL for relational data storage
-- ✅ MongoDB for document storage
+- ✅ PostgreSQL for write-optimized transaction storage
+- ✅ MongoDB for read-optimized transaction queries
 - ✅ Valkey (Redis-compatible) for caching
 - ✅ Spring AI integration for generative AI support
 - ✅ Docker Compose for easy setup
@@ -147,6 +147,30 @@ feathered-oof-bird/
 ```
 
 Status values: `PENDING`, `COMPLETED`, `FAILED`, `CANCELLED`
+
+## Data Architecture (Postgres Writes + Mongo Reads)
+
+The backend uses a dual-store pattern for transactions:
+
+- **Write path**: `TransactionRepository` writes to PostgreSQL via the `PostgresTransactionStore`.
+- **Read path**: queries are served from MongoDB via the `MongoTransactionStore`.
+- **Syncing logic**: write operations (create/update/delete) persist to Postgres and immediately upsert/delete the MongoDB read model so reads stay current.
+
+This keeps the `Transaction` domain model unchanged while letting each database optimize for its purpose.
+
+## Testing
+
+The backend test suite includes:
+
+- **Unit tests** for repository/store behavior using mocks.
+- **Integration tests** that run PostgreSQL and MongoDB with Testcontainers to validate sync behavior end-to-end.
+
+To run backend tests (Docker required for Testcontainers):
+
+```bash
+cd backend
+mvn test
+```
 
 ## Configuration
 
