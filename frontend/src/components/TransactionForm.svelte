@@ -1,45 +1,62 @@
-<script>
+<script lang="ts">
   import { Button, Input, Label, Select, Textarea, Alert } from 'flowbite-svelte';
   import { transactionService } from '../services/transactionService';
+  import type { Transaction, TransactionInput, TransactionStatus } from '../lib/types';
 
-  export let transaction = null;
-  export let onSuccess;
-  export let onCancel;
+  type TransactionFormData = Omit<TransactionInput, 'amount'> & { amount: string };
 
-  let formData = transaction ? { ...transaction } : {
+  const emptyFormData: TransactionFormData = {
     sender: '',
     receiver: '',
     amount: '',
     currency: 'USD',
     description: '',
-    status: 'PENDING'
+    status: 'PENDING',
   };
 
+  export let transaction: Transaction | null = null;
+  export let onSuccess: () => void;
+  export let onCancel: () => void;
+
+  let formData: TransactionFormData = emptyFormData;
   let loading = false;
-  let error = null;
+  let error: string | null = null;
 
   const currencies = [
     { value: 'USD', name: 'US Dollar' },
     { value: 'EUR', name: 'Euro' },
     { value: 'GBP', name: 'British Pound' },
     { value: 'JPY', name: 'Japanese Yen' },
-  ];
+  ] as const;
 
-  const statuses = [
+  const statuses: { value: TransactionStatus; name: string }[] = [
     { value: 'PENDING', name: 'Pending' },
     { value: 'COMPLETED', name: 'Completed' },
     { value: 'FAILED', name: 'Failed' },
     { value: 'CANCELLED', name: 'Cancelled' },
   ];
 
+  $: if (transaction) {
+    formData = {
+      sender: transaction.sender,
+      receiver: transaction.receiver,
+      amount: String(transaction.amount),
+      currency: transaction.currency,
+      description: transaction.description ?? '',
+      status: transaction.status,
+    };
+  } else {
+    formData = { ...emptyFormData };
+  }
+
   async function handleSubmit() {
     try {
       loading = true;
       error = null;
 
-      const data = {
+      const data: TransactionInput = {
         ...formData,
-        amount: parseFloat(formData.amount)
+        amount: parseFloat(formData.amount),
       };
 
       if (transaction) {
@@ -50,7 +67,7 @@
 
       onSuccess();
     } catch (err) {
-      error = err.message;
+      error = err instanceof Error ? err.message : 'Unable to save transaction.';
     } finally {
       loading = false;
     }
