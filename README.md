@@ -41,7 +41,7 @@ cd feathered-oof-bird
 
 2. Start all services with Docker Compose:
 ```bash
-docker-compose up -d
+docker compose --profile app up -d
 ```
 
 This will start:
@@ -61,7 +61,21 @@ This will start:
 
 Start only the databases and cache:
 ```bash
-docker-compose up -d postgres mongodb valkey
+docker compose up -d postgres mongodb valkey
+```
+
+#### Optional: Use the dev helper script
+
+This script starts the databases, builds the frontend, copies it into the backend static assets, and runs the backend.
+
+```bash
+./scripts/dev-server.sh
+```
+
+On Windows PowerShell:
+
+```powershell
+./scripts/dev-server.ps1
 ```
 
 #### 2. Run Backend
