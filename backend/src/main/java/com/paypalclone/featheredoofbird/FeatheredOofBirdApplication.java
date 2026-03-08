@@ -9,5 +9,4 @@ public class FeatheredOofBirdApplication {
     public static void main(String[] args) {
         SpringApplication.run(FeatheredOofBirdApplication.class, args);
     }
-
 }
