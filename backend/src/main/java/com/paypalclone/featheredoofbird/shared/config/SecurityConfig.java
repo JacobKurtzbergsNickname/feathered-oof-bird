@@ -1,16 +1,15 @@
-package com.paypalclone.featheredoofbird.config;
+package com.paypalclone.featheredoofbird.shared.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
@@ -44,23 +43,23 @@ public class SecurityConfig {
         this.audience = audience;
     }
 
-    /**
-     * Spring Security looks for a SecurityFilterChain bean by type at runtime.
-     * This method is not called directly in code, but is required for configuration.
-     */
     @Bean
     @Profile("dev")
     SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/public/**", "/actuator/health").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("USER")
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().denyAll())
-            .authenticationProvider(devAuthenticationProvider)
-            .httpBasic(httpBasic -> httpBasic.disable());
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(
+                        auth ->
+                                auth.requestMatchers("/public/**", "/actuator/health")
+                                        .permitAll()
+                                        .requestMatchers("/api/admin/**")
+                                        .hasRole("USER")
+                                        .requestMatchers("/api/**")
+                                        .authenticated()
+                                        .anyRequest()
+                                        .denyAll())
+                .authenticationProvider(devAuthenticationProvider)
+                .httpBasic(httpBasic -> httpBasic.disable());
         return http.build();
     }
 
@@ -68,32 +67,37 @@ public class SecurityConfig {
     @Profile("!dev")
     @SuppressWarnings("unused")
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**", "/actuator/health").permitAll()
-                        .requestMatchers("/api/admin/**").hasAuthority("SCOPE_admin:all")
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().denyAll())
-                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt
-                        .jwtAuthenticationConverter(auth0JwtAuthConverter())));
+                .authorizeHttpRequests(
+                        auth ->
+                                auth.requestMatchers("/public/**", "/actuator/health")
+                                        .permitAll()
+                                        .requestMatchers("/api/admin/**")
+                                        .hasAuthority("SCOPE_admin:all")
+                                        .requestMatchers("/api/**")
+                                        .authenticated()
+                                        .anyRequest()
+                                        .denyAll())
+                .oauth2ResourceServer(
+                        oauth ->
+                                oauth.jwt(
+                                        jwt ->
+                                                jwt.jwtAuthenticationConverter(
+                                                        auth0JwtAuthConverter())));
         return http.build();
     }
 
-    /**
-     * Spring Security looks for a JwtDecoder bean by type at runtime.
-     * This method is not called directly in code, but is required for configuration.
-     */
     @Bean
     @Profile("!dev")
     @SuppressWarnings("unused")
     JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withIssuerLocation(issuerUri).build();
-        OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(issuerUri);
+        OAuth2TokenValidator<Jwt> issuerValidator =
+                JwtValidators.createDefaultWithIssuer(issuerUri);
         OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(audience);
-        OAuth2TokenValidator<Jwt> combinedValidator = new DelegatingOAuth2TokenValidator<>(
-                issuerValidator, audienceValidator);
+        OAuth2TokenValidator<Jwt> combinedValidator =
+                new DelegatingOAuth2TokenValidator<>(issuerValidator, audienceValidator);
         jwtDecoder.setJwtValidator(combinedValidator);
         return jwtDecoder;
     }

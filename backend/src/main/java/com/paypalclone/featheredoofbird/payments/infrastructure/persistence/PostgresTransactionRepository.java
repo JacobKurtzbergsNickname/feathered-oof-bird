@@ -1,17 +1,16 @@
-package com.paypalclone.featheredoofbird.repository;
+package com.paypalclone.featheredoofbird.payments.infrastructure.persistence;
 
-import com.paypalclone.featheredoofbird.model.Transaction;
+import com.paypalclone.featheredoofbird.payments.domain.Transaction;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    
+public interface PostgresTransactionRepository extends JpaRepository<Transaction, Long> {
+
     List<Transaction> findBySender(String sender);
-    
+
     List<Transaction> findByReceiver(String receiver);
-    
+
     List<Transaction> findByStatus(Transaction.TransactionStatus status);
 }

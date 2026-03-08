@@ -1,7 +1,6 @@
-package com.paypalclone.featheredoofbird.config;
+package com.paypalclone.featheredoofbird.shared.config;
 
 import java.util.Collections;
-
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,17 +10,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DevAuthenticationProvider implements AuthenticationProvider {
+
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication)
+            throws AuthenticationException {
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
-        // Simple hardcoded check for dev
         if ("devuser".equals(username) && "devpass".equals(password)) {
             return new UsernamePasswordAuthenticationToken(
                     username,
                     password,
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-            );
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
         }
         return null;
     }

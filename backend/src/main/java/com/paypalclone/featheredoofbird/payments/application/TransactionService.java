@@ -1,18 +1,15 @@
-package com.paypalclone.featheredoofbird.service;
+package com.paypalclone.featheredoofbird.payments.application;
 
+import com.paypalclone.featheredoofbird.payments.domain.Transaction;
+import com.paypalclone.featheredoofbird.payments.infrastructure.persistence.TransactionRepository;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import com.paypalclone.featheredoofbird.model.Transaction;
-import com.paypalclone.featheredoofbird.repository.TransactionRepository;
-
-import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
 
 @Service
 @Validated
@@ -42,7 +39,8 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public List<Transaction> getTransactionsByStatus(@NonNull @NotNull Transaction.TransactionStatus status) {
+    public List<Transaction> getTransactionsByStatus(
+            @NonNull @NotNull Transaction.TransactionStatus status) {
         return transactionRepository.findByStatus(status);
     }
 
@@ -52,9 +50,13 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction updateTransaction(@NonNull @NotNull Long id, @NonNull @NotNull Transaction updatedTransaction) {
-        Transaction transaction = transactionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id));
+    public Transaction updateTransaction(
+            @NonNull @NotNull Long id, @NonNull @NotNull Transaction updatedTransaction) {
+        Transaction transaction =
+                transactionRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new RuntimeException("Transaction not found with id: " + id));
         transaction.setSender(updatedTransaction.getSender());
         transaction.setReceiver(updatedTransaction.getReceiver());
         transaction.setAmount(updatedTransaction.getAmount());
