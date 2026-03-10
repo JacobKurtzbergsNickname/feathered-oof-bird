@@ -40,9 +40,9 @@ abstraction) - **Ports/Adapters** (external integration boundaries)
 
 - **Priority:** P0\
 - **Weight:** 3\
-- **Implemented:** To Do (ready for implementation)\\
+- **Implemented:** Implemented\\
 - **Reference File:** N/A\\
-- **PR URL:** N/A\\
+- **PR URL:** [T-0001: Repository skeleton, build, and quality gates](https://github.com/JacobKurtzbergsNickname/feathered-oof-bird/pull/8/changes#diff-b803fcb7f17ed9235f1e5cb1fcd2f5d3b2838429d4368ae4c57ce4436577f03f)
  Establish a consistent project structure and quality
     gates.
 - **Implementation Notes (OO):**
@@ -61,8 +61,8 @@ abstraction) - **Ports/Adapters** (external integration boundaries)
 
 - **Priority:** P0\
 - **Weight:** 2\
-- **Implemented:** To Do (ready for implementation)\\
-- **Reference File:** N/A\\
+- **Implemented:** Done\\
+- **Reference File:** backend/src/main/java/com/paypalclone/featheredoofbird/shared/config/AppConfig.java, shared/config/AppConfigurationModule.java, shared/config/EnvironmentSecretProvider.java, shared/secrets/ISecretProvider.java, shared/secrets/SecretNotFoundException.java\\
 - **PR URL:** N/A\\
  Standardize configuration for local/dev/prod.
 - **Implementation Notes (OO):**

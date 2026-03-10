@@ -302,6 +302,36 @@ cd backend
 mvn test
 ```
 
+## Ralph Loop Workflow (Experimental)
+
+This repository includes a Windows-first Ralph loop scaffold for iterative, story-by-story autonomous implementation.
+
+### Included files
+
+- `scripts/ralph-loop.ps1` - Iteration runner with branch safety and quality gates
+- `docs/ralph-setup.md` - Setup and operator workflow
+- `docs/ralph-ticket-authoring.md` - Story authoring standards
+- `.ralph/prd.json` - Initial execution story batch
+- `.ralph/progress.txt` - Iteration memory log
+
+### Run one safe iteration
+
+```powershell
+./scripts/ralph-loop.ps1
+```
+
+### Run continuous mode
+
+```powershell
+./scripts/ralph-loop.ps1 -RunMode continuous -MaxIterations 20
+```
+
+### Notes
+
+- Protected branches (`main`, `master`) are blocked by default.
+- Backend quality gate uses `./mvnw.cmd verify`.
+- Frontend quality gate always runs `npm run build`; lint/test run only if scripts exist.
+
 ## Contributing
 
 1. Fork the repository
