@@ -3,6 +3,7 @@ package com.paypalclone.featheredoofbird.shared.config;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -36,25 +37,48 @@ public record AppConfig(@Valid @NotNull Auth auth) {
     /**
      * Auth / identity-provider settings.
      *
-     * <p>Both fields are mandatory in every non-dev environment; the {@code @NotBlank} constraints
-     * cause a startup failure if they are absent, surfacing the misconfiguration immediately rather
-     * than at request time. The {@code dev} profile supplies safe placeholder values in {@code
-     * application-dev.properties} so the application can boot without real Auth0 credentials.
+     * <p>The active provider determines which nested properties must be populated. Auth0 settings
+     * may stay blank when local JWT is enabled, while local JWT settings are always given safe
+     * defaults for development.
      */
     public record Auth(
-            @NotBlank(message = "app.auth.issuer-uri must be set (env: AUTH0_ISSUER_URI)")
-                    String issuerUri,
-            @NotBlank(message = "app.auth.audience must be set (env: AUTH0_AUDIENCE)")
-                    String audience) {
+            @NotBlank(message = "app.auth.provider must be set") String provider,
+            String issuerUri,
+            String audience,
+            @Valid @NotNull LocalJwt localJwt) {
 
         /**
-         * Returns {@code true} when both {@code issuerUri} and {@code audience} are non-blank.
+         * Returns {@code true} when the active provider has all required values.
          *
          * <p>Useful for conditional behaviour in components that must adapt at runtime (e.g. the
-         * security configuration skipping JWT validation in the dev profile).
+         * security configuration selecting the correct JWT strategy).
          */
         public boolean isFullyConfigured() {
-            return !issuerUri.isBlank() && !audience.isBlank();
+            return isLocalJwtProvider()
+                    ? localJwt.isFullyConfigured()
+                    : isExternalProviderConfigured();
+        }
+
+        public boolean isLocalJwtProvider() {
+            return "local-jwt".equals(provider);
+        }
+
+        public boolean isExternalProviderConfigured() {
+            return issuerUri != null
+                    && !issuerUri.isBlank()
+                    && audience != null
+                    && !audience.isBlank();
+        }
+    }
+
+    public record LocalJwt(
+            @NotBlank(message = "app.auth.local-jwt.issuer must be set") String issuer,
+            @NotBlank(message = "app.auth.local-jwt.secret must be set") String secret,
+            @NotNull(message = "app.auth.local-jwt.access-token-ttl must be set")
+                    Duration accessTokenTtl) {
+
+        public boolean isFullyConfigured() {
+            return !issuer.isBlank() && !secret.isBlank() && !accessTokenTtl.isZero();
         }
     }
 }

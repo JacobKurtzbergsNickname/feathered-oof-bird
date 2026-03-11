@@ -2,6 +2,20 @@
     "schema_version":  "1.0",
     "project":  "feathered-oof-bird",
     "notes":  "Initial Ralph execution batch covering Milestones 0-3 foundations.",
+    "deferred_scope":  {
+                           "auth":  [
+                                        "Email verification",
+                                        "MFA",
+                                        "Password reset",
+                                        "Profile management",
+                                        "Route-based app redesign",
+                                        "Real Auth0 login implementation"
+                                    ],
+                           "design_constraints":  [
+                                                      "Keep Auth0 easy later by preserving a provider-based backend strategy.",
+                                                      "Keep the frontend auth service provider-agnostic so local JWT can be swapped out later."
+                                                  ]
+                       },
     "features":  [
                      {
                          "id":  "001",

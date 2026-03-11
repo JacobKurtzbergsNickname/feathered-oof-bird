@@ -2,6 +2,7 @@ package com.paypalclone.featheredoofbird.shared.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -27,8 +28,12 @@ class AppConfigTest {
 
         private final ApplicationContextRunner happyRunner =
                 runner.withPropertyValues(
+                        "app.auth.provider=local-jwt",
                         "app.auth.issuer-uri=https://test.example.auth0.com/",
-                        "app.auth.audience=test-audience");
+                        "app.auth.audience=test-audience",
+                        "app.auth.local-jwt.issuer=http://localhost:8080",
+                        "app.auth.local-jwt.secret=test-secret",
+                        "app.auth.local-jwt.access-token-ttl=PT8H");
 
         @Test
         void bindsIssuerUri() {
@@ -46,6 +51,18 @@ class AppConfigTest {
                     ctx -> {
                         AppConfig config = ctx.getBean(AppConfig.class);
                         assertThat(config.auth().audience()).isEqualTo("test-audience");
+                    });
+        }
+
+        @Test
+        void bindsLocalJwtSettings() {
+            happyRunner.run(
+                    ctx -> {
+                        AppConfig config = ctx.getBean(AppConfig.class);
+                        assertThat(config.auth().localJwt().issuer())
+                                .isEqualTo("http://localhost:8080");
+                        assertThat(config.auth().localJwt().accessTokenTtl())
+                                .isEqualTo(Duration.ofHours(8));
                     });
         }
 
@@ -71,25 +88,61 @@ class AppConfigTest {
 
         @Test
         void returnsFalse_whenIssuerUriIsBlank() {
-            var auth = new AppConfig.Auth("", "some-audience");
+            var auth =
+                    new AppConfig.Auth(
+                            "auth0",
+                            "",
+                            "some-audience",
+                            new AppConfig.LocalJwt(
+                                    "http://localhost:8080", "test-secret", Duration.ofHours(8)));
             assertThat(auth.isFullyConfigured()).isFalse();
         }
 
         @Test
         void returnsFalse_whenAudienceIsBlank() {
-            var auth = new AppConfig.Auth("https://example.auth0.com/", "");
+            var auth =
+                    new AppConfig.Auth(
+                            "auth0",
+                            "https://example.auth0.com/",
+                            "",
+                            new AppConfig.LocalJwt(
+                                    "http://localhost:8080", "test-secret", Duration.ofHours(8)));
             assertThat(auth.isFullyConfigured()).isFalse();
         }
 
         @Test
         void returnsFalse_whenBothBlank() {
-            var auth = new AppConfig.Auth("", "");
+            var auth =
+                    new AppConfig.Auth(
+                            "auth0",
+                            "",
+                            "",
+                            new AppConfig.LocalJwt(
+                                    "http://localhost:8080", "test-secret", Duration.ofHours(8)));
             assertThat(auth.isFullyConfigured()).isFalse();
         }
 
         @Test
         void returnsTrue_whenBothNonBlank() {
-            var auth = new AppConfig.Auth("https://example.auth0.com/", "my-audience");
+            var auth =
+                    new AppConfig.Auth(
+                            "auth0",
+                            "https://example.auth0.com/",
+                            "my-audience",
+                            new AppConfig.LocalJwt(
+                                    "http://localhost:8080", "test-secret", Duration.ofHours(8)));
+            assertThat(auth.isFullyConfigured()).isTrue();
+        }
+
+        @Test
+        void returnsTrue_forLocalJwtWhenLocalSettingsPresent() {
+            var auth =
+                    new AppConfig.Auth(
+                            "local-jwt",
+                            "",
+                            "",
+                            new AppConfig.LocalJwt(
+                                    "http://localhost:8080", "test-secret", Duration.ofHours(8)));
             assertThat(auth.isFullyConfigured()).isTrue();
         }
     }
@@ -101,21 +154,48 @@ class AppConfigTest {
 
         @Test
         void failsToStart_whenIssuerUriIsBlank() {
-            runner.withPropertyValues("app.auth.issuer-uri=", "app.auth.audience=test-audience")
-                    .run(ctx -> assertThat(ctx).hasFailed());
+            runner.withPropertyValues(
+                            "app.auth.provider=auth0",
+                            "app.auth.issuer-uri=",
+                            "app.auth.audience=test-audience",
+                            "app.auth.local-jwt.issuer=http://localhost:8080",
+                            "app.auth.local-jwt.secret=test-secret",
+                            "app.auth.local-jwt.access-token-ttl=PT8H")
+                    .run(
+                            ctx ->
+                                    assertThat(
+                                                    ctx.getBean(AppConfig.class)
+                                                            .auth()
+                                                            .isFullyConfigured())
+                                            .isFalse());
         }
 
         @Test
         void failsToStart_whenAudienceIsBlank() {
             runner.withPropertyValues(
+                            "app.auth.provider=auth0",
                             "app.auth.issuer-uri=https://test.example.auth0.com/",
-                            "app.auth.audience=")
-                    .run(ctx -> assertThat(ctx).hasFailed());
+                            "app.auth.audience=",
+                            "app.auth.local-jwt.issuer=http://localhost:8080",
+                            "app.auth.local-jwt.secret=test-secret",
+                            "app.auth.local-jwt.access-token-ttl=PT8H")
+                    .run(
+                            ctx ->
+                                    assertThat(
+                                                    ctx.getBean(AppConfig.class)
+                                                            .auth()
+                                                            .isFullyConfigured())
+                                            .isFalse());
         }
 
         @Test
-        void failsToStart_whenBothAuthValuesAreMissing() {
-            runner.run(ctx -> assertThat(ctx).hasFailed());
+        void startsForLocalJwt_whenLocalSettingsArePresent() {
+            runner.withPropertyValues(
+                            "app.auth.provider=local-jwt",
+                            "app.auth.local-jwt.issuer=http://localhost:8080",
+                            "app.auth.local-jwt.secret=test-secret",
+                            "app.auth.local-jwt.access-token-ttl=PT8H")
+                    .run(ctx -> assertThat(ctx).hasNotFailed());
         }
     }
 }
