@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.0",
+  "project": "feathered-oof-bird",
+  "notes": "Initial Ralph execution batch covering Milestones 0-3 foundations.",
+  "features": [
+    {
+      "id": "001",
+      "type": "feature",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Add request correlation id filter and expose trace id in API responses",
+      "steps": [
+        "Create CorrelationId value object under shared module",
+        "Add request filter/interceptor to set correlation id per request",
+        "Attach correlation id to response headers",
+        "Ensure logs include correlation id via MDC",
+        "Cover behavior with unit/integration tests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/shared/config/CorrelationIdFilterTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "002",
+      "type": "feature",
+      "category": "infrastructure",
+      "priority": "critical",
+      "description": "Standardize API error contract with code message and traceId",
+      "steps": [
+        "Create ApiError DTO and error code model",
+        "Implement global exception handler",
+        "Map domain and validation exceptions to stable codes",
+        "Return traceId in all error responses",
+        "Add tests for error response shape"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "001"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/shared/config/GlobalExceptionHandlerTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "003",
+      "type": "feature",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Implement user registration endpoint with password hashing",
+      "steps": [
+        "Define User entity and repository contract",
+        "Add registration request/response DTOs",
+        "Integrate PasswordHasher service using bcrypt or argon2",
+        "Create POST register endpoint",
+        "Persist user with hashed password only",
+        "Add registration tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "002"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/identity/application/UserRegistrationServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "004",
+      "type": "feature",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Implement login endpoint returning JWT/session token",
+      "steps": [
+        "Add authentication request and response contracts",
+        "Implement credential verification against password hash",
+        "Issue signed JWT/session token",
+        "Handle invalid credentials with stable error",
+        "Add login tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "003"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/identity/application/AuthServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "005",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Implement role model and authorization guard helpers",
+      "steps": [
+        "Define Role value object/types",
+        "Add AuthorizationService with ownership and role checks",
+        "Protect admin endpoints",
+        "Add basic ownership guard wiring for wallet/transaction resources",
+        "Add tests for allowed and denied paths"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "004"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/identity/application/AuthorizationServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "006",
+      "type": "feature",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Add Money and Currency value objects using minor units",
+      "steps": [
+        "Create Currency value object with strict code validation",
+        "Create Money value object using integer minor units",
+        "Implement safe arithmetic for same-currency operations",
+        "Reject currency mismatch operations",
+        "Add focused unit tests"
+      ],
+      "estimated_complexity": "small",
+      "depends_on": [
+        "005"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/domain/MoneyTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "007",
+      "type": "feature",
+      "category": "functional",
+      "priority": "critical",
+      "description": "Create append-only double-entry ledger transaction writer",
+      "steps": [
+        "Define ledger entities for account transaction and entry",
+        "Implement write path that enforces per-currency zero-sum",
+        "Persist transaction and entries atomically",
+        "Prevent entry mutation after creation",
+        "Add concurrency and invariant tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "006"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/application/LedgerServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "008",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Provision wallet and platform accounts for new users",
+      "steps": [
+        "Create WalletProvisioningService",
+        "Provision user wallet plus internal clearing and fee accounts",
+        "Make provisioning idempotent",
+        "Wire provisioning on user creation event/path",
+        "Add provisioning tests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "007"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/application/WalletProvisioningServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "009",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Add balance query endpoint with paginated transaction history",
+      "steps": [
+        "Build balance projection/query service",
+        "Add balance endpoint returning available values",
+        "Add paginated transaction history endpoint",
+        "Support date range type and status filters",
+        "Add API tests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "008"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/infrastructure/BalanceQueryControllerTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "010",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Implement payment state machine with guarded transitions",
+      "steps": [
+        "Create Payment entity and PaymentStatus model",
+        "Implement centralized PaymentStateMachine",
+        "Enforce allowed transition graph",
+        "Return meaningful domain errors for invalid transitions",
+        "Add state machine tests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "007"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/domain/PaymentStateMachineTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    }
+  ]
+}

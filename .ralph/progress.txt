@@ -1,0 +1,6 @@
+=== Ralph Progress Log ===
+Started: 2026-03-10
+Mode: Human-in-loop by default
+
+Use this file as persistent execution memory between iterations.
+For failures, append a section with gate name, error snippet, and next-attempt guidance.
