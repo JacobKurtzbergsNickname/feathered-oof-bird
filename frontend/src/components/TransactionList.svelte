@@ -83,10 +83,10 @@
             </td>
             <td>{formatDate(transaction.createdAt)}</td>
             <td class="space-x-2">
-              <Button size="xs" color="blue" on:click={() => onEdit(transaction)}>
+              <Button size="xs" color="blue" onclick={() => onEdit(transaction)}>
                 Edit
               </Button>
-              <Button size="xs" color="red" on:click={() => onDelete(transaction.id)}>
+              <Button size="xs" color="red" onclick={() => onDelete(transaction.id)}>
                 Delete
               </Button>
             </td>

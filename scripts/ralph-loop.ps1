@@ -4,7 +4,10 @@ param(
   [int]$MaxIterations = 20,
   [string]$PrdPath = ".ralph/prd.json",
   [string]$ProgressPath = ".ralph/progress.txt",
+  [ValidateSet("manual", "copilot", "claude", "custom")]
+  [string]$AgentProfile = "manual",
   [string]$AgentCommand = "",
+  [string]$AgentProfilesPath = ".ralph/agent-profiles.json",
   [string[]]$ProtectedBranches = @("main", "master"),
   [switch]$AllowProtectedBranch,
   [switch]$AutoCreateBranch
@@ -16,6 +19,7 @@ $ErrorActionPreference = "Stop"
 $rootDir = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $resolvedPrdPath = Join-Path $rootDir $PrdPath
 $resolvedProgressPath = Join-Path $rootDir $ProgressPath
+$resolvedAgentProfilesPath = Join-Path $rootDir $AgentProfilesPath
 
 if ($RunMode -eq "once") {
   $MaxIterations = 1
@@ -245,6 +249,36 @@ function Ensure-ProgressFile {
   }
 }
 
+function Resolve-AgentCommand {
+  if ($AgentCommand) {
+    return $AgentCommand
+  }
+
+  if ($AgentProfile -eq "manual") {
+    return ""
+  }
+
+  if ($AgentProfile -eq "custom") {
+    throw "AgentProfile 'custom' requires -AgentCommand to be provided."
+  }
+
+  if (-not (Test-Path $resolvedAgentProfilesPath)) {
+    throw "Agent profiles file not found at $resolvedAgentProfilesPath. Create it from docs/ralph-agent-profiles.example.json."
+  }
+
+  $profilesJson = Get-Content $resolvedAgentProfilesPath -Raw | ConvertFrom-Json
+  if (-not $profilesJson.$AgentProfile) {
+    throw "Agent profile '$AgentProfile' is not defined in $resolvedAgentProfilesPath."
+  }
+
+  $profileCommand = [string]$profilesJson.$AgentProfile
+  if (-not $profileCommand.Trim()) {
+    throw "Agent profile '$AgentProfile' is empty in $resolvedAgentProfilesPath."
+  }
+
+  return $profileCommand
+}
+
 function Stage-And-Commit {
   param([object]$Feature)
 
@@ -270,7 +304,10 @@ function Stage-And-Commit {
 Ensure-ProgressFile
 Ensure-BranchSafety
 
+$effectiveAgentCommand = Resolve-AgentCommand
+
 Write-Log "Starting Ralph loop in '$RunMode' mode. Max iterations: $MaxIterations"
+Write-Log "Agent profile: $AgentProfile"
 
 for ($i = 1; $i -le $MaxIterations; $i++) {
   $prd = Load-Prd
@@ -291,8 +328,8 @@ for ($i = 1; $i -le $MaxIterations; $i++) {
   $feature | ConvertTo-Json -Depth 100 | Set-Content -Path $storyContextPath
 
   try {
-    if ($AgentCommand) {
-      Run-CheckedCommand -WorkingDir $rootDir -Command $AgentCommand -FailureMessage "Agent command failed"
+    if ($effectiveAgentCommand) {
+      Run-CheckedCommand -WorkingDir $rootDir -Command $effectiveAgentCommand -FailureMessage "Agent command failed"
     } else {
       Write-Log "Manual mode: implement the story, then press Enter to run quality gates."
       Write-Host "Current story JSON: $storyContextPath"

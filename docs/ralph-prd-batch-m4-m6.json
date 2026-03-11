@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "batch": "m4-m6",
+  "scope": "Merchant checkout, fees, notifications, holds, refunds, disputes",
+  "features": [
+    {
+      "id": "401",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Add merchant account type and rotatable API credentials",
+      "steps": [
+        "Create Merchant aggregate and persistence",
+        "Add credential generation and hashing",
+        "Expose credential rotation endpoint",
+        "Authorize merchant-authenticated requests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/application/MerchantCredentialServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "402",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Implement orders create API with validated totals",
+      "steps": [
+        "Create Order aggregate and line item models",
+        "Add POST orders endpoint",
+        "Validate order totals and currency consistency",
+        "Persist in CREATED status"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "401"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/infrastructure/OrderControllerTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "403",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Implement approve and capture checkout flow with ledger movement",
+      "steps": [
+        "Add approve endpoint for authenticated payer",
+        "Add capture endpoint for merchant",
+        "Book payer to merchant plus fee entries in ledger",
+        "Enforce order transitions CREATED APPROVED CAPTURED COMPLETED",
+        "Guarantee atomic writes"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "402"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/application/CheckoutServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "404",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Add return URL callbacks and authenticated receipt read endpoint",
+      "steps": [
+        "Add success and cancel callback handling",
+        "Add receipt query endpoint",
+        "Expose fee and net details in receipt DTO",
+        "Enforce auth for receipt retrieval"
+      ],
+      "estimated_complexity": "small",
+      "depends_on": [
+        "403"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/infrastructure/ReceiptControllerTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "501",
+      "type": "feature",
+      "category": "infrastructure",
+      "priority": "high",
+      "description": "Introduce notification port with console adapter",
+      "steps": [
+        "Define INotificationSender port",
+        "Implement console adapter for dev",
+        "Create template catalog for messages",
+        "Wire payment and request events to notification calls"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "403"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/notifications/application/NotificationServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "502",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Add deterministic fee calculator and ledger fee booking",
+      "steps": [
+        "Implement fee policy and calculator",
+        "Apply fee to capture flow",
+        "Book fee to platform fee account",
+        "Expose fee breakdown on payment details"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "403"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/domain/FeeCalculatorTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "503",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Implement held balance flow and scheduled release job",
+      "steps": [
+        "Add hold account movement logic",
+        "Track hold records with release timestamps",
+        "Implement release scheduler",
+        "Expose held balance in balance query"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "502"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/application/HoldServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "601",
+      "type": "feature",
+      "category": "functional",
+      "priority": "high",
+      "description": "Add full and partial refunds with ledger-safe reversal",
+      "steps": [
+        "Create refund aggregate linked to payment",
+        "Implement full refund logic",
+        "Implement partial refund constraints",
+        "Book ledger reversal entries including fee policy"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "502"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/application/RefundServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "602",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Add dispute case workflow with audit log and notifications",
+      "steps": [
+        "Create DisputeCase aggregate and status flow",
+        "Add endpoints for create and status updates",
+        "Write audit records for each transition",
+        "Trigger notifications on changes"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "501",
+        "601"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/risk/application/DisputeServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    }
+  ]
+}

@@ -1,9 +1,11 @@
 # Feathered OOF Bird
+
 PayPal clone for portfolio
 
 ## Overview
 
 This is a full-stack PayPal-like transaction management system built with:
+
 - **Backend**: Spring Boot 3.2 with Java 17
 - **Frontend**: Svelte with Vite and Flowbite-Svelte UI components
 - **Databases**: PostgreSQL (transactional data), MongoDB (document storage), Valkey (Redis alternative for caching)
@@ -34,32 +36,37 @@ This is a full-stack PayPal-like transaction management system built with:
 ### Option 1: Using Docker Compose (Recommended)
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/JacobKurtzbergsNickname/feathered-oof-bird.git
 cd feathered-oof-bird
 ```
 
-2. Start all services with Docker Compose:
+1. Start all services with Docker Compose:
+
 ```bash
 docker compose --profile app up -d
 ```
 
 This will start:
+
 - PostgreSQL on port 5432
 - MongoDB on port 27017
 - Valkey on port 6379
 - Backend API on port 8080
 - Frontend on port 5173
 
-3. Access the application:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8080/api/transactions
+1. Access the application:
+
+- Frontend: <http://localhost:5173>
+- Backend API: <http://localhost:8080/api/transactions>
 
 ### Option 2: Local Development
 
 #### 1. Start Infrastructure Services
 
 Start only the databases and cache:
+
 ```bash
 docker compose up -d postgres mongodb valkey
 ```
@@ -85,7 +92,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-The backend will start on http://localhost:8080
+The backend will start on <http://localhost:8080>
 
 #### 3. Run Frontend
 
@@ -95,7 +102,7 @@ npm install
 npm run dev
 ```
 
-The frontend will start on http://localhost:5173
+The frontend will start on <http://localhost:5173>
 
 ## Project Structure
 
@@ -257,6 +264,7 @@ VITE_API_URL=http://localhost:8080
 ## Technologies Used
 
 ### Backend
+
 - Spring Boot 3.2.11
 - Spring Data JPA
 - Spring Data MongoDB
@@ -267,12 +275,14 @@ VITE_API_URL=http://localhost:8080
 - Jakarta Validation
 
 ### Frontend
+
 - Svelte
 - Vite
 - Flowbite-Svelte (UI Component Library)
 - Tailwind CSS
 
 ### Infrastructure
+
 - Docker & Docker Compose
 - PostgreSQL 16
 - MongoDB 7
@@ -283,12 +293,14 @@ VITE_API_URL=http://localhost:8080
 ### Building for Production
 
 #### Backend
+
 ```bash
 cd backend
 mvn clean package
 ```
 
 #### Frontend
+
 ```bash
 cd frontend
 npm run build
@@ -297,6 +309,7 @@ npm run build
 ### Running Tests
 
 #### Backend
+
 ```bash
 cd backend
 mvn test
@@ -325,6 +338,20 @@ This repository includes a Windows-first Ralph loop scaffold for iterative, stor
 ```powershell
 ./scripts/ralph-loop.ps1 -RunMode continuous -MaxIterations 20
 ```
+
+### Run with named agent profile
+
+1. Copy `docs/ralph-agent-profiles.example.json` to `.ralph/agent-profiles.json`
+2. Run with profile:
+
+```powershell
+./scripts/ralph-loop.ps1 -AgentProfile copilot
+```
+
+### Additional PRD execution batches
+
+- `docs/ralph-prd-batch-m4-m6.json`
+- `docs/ralph-prd-batch-m7-m10.json`
 
 ### Notes
 
