@@ -13,3 +13,8 @@ For failures, append a section with gate name, error snippet, and next-attempt g
 [2026-03-11 14:37:10] START [004] Implement login endpoint returning JWT/session token
 [2026-03-11 14:37:52] PASS [004] committed successfully
 [2026-03-11 14:37:52] START [005] Implement role model and authorization guard helpers
+[2026-03-11 16:03:36] START [005] Implement role model and authorization guard helpers
+[2026-03-11 16:03:56] FAIL [005] Backend gate failed: mvnw verify
+[2026-03-11 16:03:56] COMPLETE: no remaining unblocked features
+[2026-03-11 16:06:26] COMPLETE: no remaining unblocked features
+[2026-03-11 16:09:45] START [006] Add Money and Currency value objects using minor units

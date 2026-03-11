@@ -29,7 +29,14 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers("/public/**", "/actuator/health")
+                                auth.requestMatchers(
+                                                "/",
+                                                "/index.html",
+                                                "/assets/**",
+                                                "/favicon.ico",
+                                                "/error",
+                                                "/public/**",
+                                                "/actuator/health")
                                         .permitAll()
                                         .requestMatchers("/api/admin/**")
                                         .hasRole("USER")
@@ -50,7 +57,14 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers("/public/**", "/actuator/health")
+                                auth.requestMatchers(
+                                                "/",
+                                                "/index.html",
+                                                "/assets/**",
+                                                "/favicon.ico",
+                                                "/error",
+                                                "/public/**",
+                                                "/actuator/health")
                                         .permitAll()
                                         .requestMatchers("/api/admin/**")
                                         .hasAuthority("SCOPE_admin:all")

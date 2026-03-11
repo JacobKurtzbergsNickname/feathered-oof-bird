@@ -1,3 +1,7 @@
+param(
+  [switch]$PrepareOnly
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -12,7 +16,7 @@ try {
 }
 
 Write-Host "Starting database dependencies..."
-docker compose up -d postgres mongodb valkey
+docker compose up -d ooftish-postgres ooftish-mongo ooftish-valkey
 
 Write-Host "Building frontend..."
 Push-Location (Join-Path $rootDir "frontend")
@@ -27,6 +31,11 @@ if (Test-Path $staticDir) {
 }
 New-Item -ItemType Directory -Force -Path $staticDir | Out-Null
 Copy-Item -Recurse -Force (Join-Path $rootDir "frontend/dist/*") $staticDir
+
+if ($PrepareOnly) {
+  Write-Host "Preparation complete (dependencies running + frontend synced to backend static)."
+  exit 0
+}
 
 Write-Host "Starting backend development server..."
 Push-Location (Join-Path $rootDir "backend")
