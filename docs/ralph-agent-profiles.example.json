@@ -1,0 +1,4 @@
+{
+  "copilot": "copilot agent run --prompt-file .ralph/prompts/execution-prompt.md --context-file .ralph/current-story.json",
+  "claude": "claude --print --append-system-prompt-file .ralph/prompts/execution-prompt.md"
+}

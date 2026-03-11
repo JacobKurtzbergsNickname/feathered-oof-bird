@@ -146,7 +146,7 @@
         id="description"
         bind:value={formData.description}
         placeholder="Enter transaction description"
-        rows="3"
+        rows={3}
       />
     </div>
 
@@ -154,7 +154,7 @@
       <Button type="submit" color="blue" disabled={loading}>
         {loading ? 'Saving...' : transaction ? 'Update' : 'Create'}
       </Button>
-      <Button type="button" color="alternative" on:click={onCancel}>
+      <Button type="button" color="alternative" onclick={onCancel}>
         Cancel
       </Button>
     </div>

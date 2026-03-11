@@ -2,7 +2,6 @@ package com.paypalclone.featheredoofbird.auth.auth0;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,10 +11,11 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 /**
- * Converts an Auth0 JWT into a {@link JwtAuthenticationToken} by combining
- * standard scope-based authorities with Auth0's {@code permissions} claim.
+ * Converts an Auth0 JWT into a {@link JwtAuthenticationToken} by combining standard scope-based
+ * authorities with Auth0's {@code permissions} claim.
  */
-public class Auth0JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+public class Auth0JwtAuthenticationConverter
+        implements Converter<Jwt, AbstractAuthenticationToken> {
 
     private final JwtGrantedAuthoritiesConverter scopeConverter;
 

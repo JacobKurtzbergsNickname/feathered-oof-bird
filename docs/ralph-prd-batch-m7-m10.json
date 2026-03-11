@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0",
+  "batch": "m7-m10",
+  "scope": "Events, webhooks, risk controls, admin reporting, optional advanced features",
+  "features": [
+    {
+      "id": "701",
+      "type": "feature",
+      "category": "infrastructure",
+      "priority": "high",
+      "description": "Implement domain events with transactional outbox",
+      "steps": [
+        "Define base domain event contract",
+        "Create outbox message persistence model",
+        "Persist outbox records in same transaction as domain writes",
+        "Add background dispatcher and handlers"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/shared/events/OutboxDispatcherTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "702",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Add merchant webhooks with HMAC signatures and retry policy",
+      "steps": [
+        "Create webhook subscription model",
+        "Sign outgoing payloads with merchant secret",
+        "Implement delivery retry with backoff",
+        "Store webhook delivery attempt records"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "701"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/notifications/infrastructure/WebhookDispatcherTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "801",
+      "type": "feature",
+      "category": "quality",
+      "priority": "medium",
+      "description": "Add rate limiting and velocity-based anti-abuse checks",
+      "steps": [
+        "Implement request rate limiter for login and payment creation",
+        "Add transfer velocity window policy",
+        "Block or hold payments when threshold exceeded",
+        "Return stable error response for violations"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/risk/application/RateLimitServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "802",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Implement risk engine v1 with allow hold reject decisions",
+      "steps": [
+        "Create risk engine decision contract",
+        "Record decision reasons linked to payment id",
+        "Integrate hold/reject behavior with payment flow",
+        "Expose risk decision trace for admin"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "801"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/risk/application/RiskEngineTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "901",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Create admin read views for users payments and ledger entries",
+      "steps": [
+        "Add admin query service",
+        "Implement list and search endpoints",
+        "Add payment drill-down including ledger entries",
+        "Enforce admin-only access"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "802"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/admin/infrastructure/AdminReadControllerTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "902",
+      "type": "feature",
+      "category": "functional",
+      "priority": "low",
+      "description": "Add CSV export for transaction reporting",
+      "steps": [
+        "Implement CSV serializer for filtered transactions",
+        "Add date range and status filters",
+        "Expose export endpoint with secure download",
+        "Validate report columns for gross fee net and timestamps"
+      ],
+      "estimated_complexity": "small",
+      "depends_on": [
+        "901"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/admin/infrastructure/TransactionExportControllerTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "1001",
+      "type": "spike",
+      "category": "functional",
+      "priority": "low",
+      "description": "Prototype multi-currency wallet support with cross-currency restriction",
+      "steps": [
+        "Extend wallet model for per-currency accounts",
+        "Update transfer validation to require same currency",
+        "Add rejection behavior for mixed-currency transfers",
+        "Create migration notes for future FX integration"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "701"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/domain/MultiCurrencyWalletTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "1002",
+      "type": "spike",
+      "category": "infrastructure",
+      "priority": "low",
+      "description": "Prototype CQRS balance projection read model",
+      "steps": [
+        "Design projection schema",
+        "Update projector on ledger events",
+        "Add rebuild from ledger history command",
+        "Benchmark read latency against computed balance"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "701"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/application/BalanceProjectionRebuildTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "1003",
+      "type": "spike",
+      "category": "infrastructure",
+      "priority": "low",
+      "description": "Prototype event-sourcing mode for payment aggregate",
+      "steps": [
+        "Define payment event stream schema",
+        "Implement aggregate replay",
+        "Add deterministic replay tests",
+        "Evaluate optional snapshot strategy"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "701"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/domain/PaymentEventSourcingTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    }
+  ]
+}
