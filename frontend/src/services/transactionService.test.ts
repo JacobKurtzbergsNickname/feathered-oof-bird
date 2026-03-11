@@ -1,11 +1,13 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { transactionService } from './transactionService';
+import { clearStoredAuthSession, storeAuthSession } from './authStorage';
 
 describe('transactionService', () => {
   const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    clearStoredAuthSession();
   });
 
   afterEach(() => {
@@ -53,5 +55,40 @@ describe('transactionService', () => {
         status: 'PENDING',
       }),
     ).rejects.toThrow('Failed to create transaction');
+  });
+
+  it('adds bearer authorization header when a session exists', async () => {
+    storeAuthSession({
+      accessToken: 'jwt-token',
+      tokenType: 'Bearer',
+      expiresAt: '2026-03-11T12:00:00Z',
+      user: {
+        id: 1,
+        email: 'user@example.com',
+        role: 'PERSONAL',
+        status: 'ACTIVE',
+      },
+    });
+
+    globalThis.fetch = vi.fn(async () =>
+      new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ) as typeof fetch;
+
+    await transactionService.getAll();
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'http://localhost:8080/api/transactions',
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
+
+    const requestInit = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1] as {
+      headers: Headers;
+    };
+    expect(requestInit.headers.get('Authorization')).toBe('Bearer jwt-token');
   });
 });

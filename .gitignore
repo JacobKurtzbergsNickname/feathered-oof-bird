@@ -31,3 +31,6 @@ logs/
 
 # Ralph loop workspace
 .ralph/
+
+# .ENV
+.env
