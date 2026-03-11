@@ -9,3 +9,5 @@ For failures, append a section with gate name, error snippet, and next-attempt g
 [2026-03-11 11:28:30] START [002] Standardize API error contract with code message and traceId
 [2026-03-11 14:31:42] PASS [002] committed successfully
 [2026-03-11 14:31:42] START [003] Implement user registration endpoint with password hashing
+[2026-03-11 14:37:10] PASS [003] committed successfully
+[2026-03-11 14:37:10] START [004] Implement login endpoint returning JWT/session token

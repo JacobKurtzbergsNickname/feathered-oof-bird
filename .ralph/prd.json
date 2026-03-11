@@ -96,8 +96,8 @@
                          "test_files":  [
                                             "backend/src/test/java/com/paypalclone/featheredoofbird/identity/application/AuthServiceTest.java"
                                         ],
-                         "passes":  false,
-                         "iterations_taken":  0,
+                         "passes":  true,
+                         "iterations_taken":  1,
                          "blocked_reason":  null
                      },
                      {
