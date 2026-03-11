@@ -1,0 +1,20 @@
+{
+  "name": "auth-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Auth0 authentication flow test scripts",
+  "type": "module",
+  "scripts": {
+    "get-token": "tsx src/get-token.ts",
+    "test-api": "tsx src/test-api.ts",
+    "test-flow": "tsx src/test-api.ts --token $(tsx src/get-token.ts)"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "@types/node": "^22.13.10"
+  }
+}
