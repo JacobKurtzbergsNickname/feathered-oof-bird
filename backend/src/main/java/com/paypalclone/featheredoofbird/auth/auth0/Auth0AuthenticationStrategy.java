@@ -1,5 +1,8 @@
 package com.paypalclone.featheredoofbird.auth.auth0;
 
+import com.paypalclone.featheredoofbird.auth.AudienceValidator;
+import com.paypalclone.featheredoofbird.auth.AuthenticationStrategy;
+import com.paypalclone.featheredoofbird.auth.JwtDecoderFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
@@ -13,13 +16,9 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
-import com.paypalclone.featheredoofbird.auth.AudienceValidator;
-import com.paypalclone.featheredoofbird.auth.AuthenticationStrategy;
-import com.paypalclone.featheredoofbird.auth.JwtDecoderFactory;
-
 /**
- * Auth0-specific authentication strategy.
- * Validates issuer and audience, and maps the {@code permissions} claim to authorities.
+ * Auth0-specific authentication strategy. Validates issuer and audience, and maps the {@code
+ * permissions} claim to authorities.
  */
 @Component
 @Profile("!dev")
@@ -42,9 +41,11 @@ public class Auth0AuthenticationStrategy implements AuthenticationStrategy {
     @Override
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder decoder = decoderFactory.create(issuerUri);
-        OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(issuerUri);
+        OAuth2TokenValidator<Jwt> issuerValidator =
+                JwtValidators.createDefaultWithIssuer(issuerUri);
         OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(audience);
-        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(issuerValidator, audienceValidator));
+        decoder.setJwtValidator(
+                new DelegatingOAuth2TokenValidator<>(issuerValidator, audienceValidator));
         return decoder;
     }
 

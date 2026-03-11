@@ -1,5 +1,7 @@
 package com.paypalclone.featheredoofbird.auth.jwt;
 
+import com.paypalclone.featheredoofbird.auth.AuthenticationStrategy;
+import com.paypalclone.featheredoofbird.auth.JwtDecoderFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
@@ -12,13 +14,9 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.stereotype.Component;
 
-import com.paypalclone.featheredoofbird.auth.AuthenticationStrategy;
-import com.paypalclone.featheredoofbird.auth.JwtDecoderFactory;
-
 /**
- * Standard JWT authentication strategy.
- * Validates the issuer claim only and uses Spring Security's default
- * scope-to-authority mapping.
+ * Standard JWT authentication strategy. Validates the issuer claim only and uses Spring Security's
+ * default scope-to-authority mapping.
  */
 @Component
 @Profile("!dev")

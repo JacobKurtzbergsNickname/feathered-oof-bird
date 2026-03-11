@@ -57,7 +57,7 @@
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
         PayPal Clone - Transaction Manager
       </h1>
-      <Button color="blue" on:click={openCreateModal}>
+      <Button color="blue" onclick={openCreateModal}>
         Create Transaction
       </Button>
     </div>
