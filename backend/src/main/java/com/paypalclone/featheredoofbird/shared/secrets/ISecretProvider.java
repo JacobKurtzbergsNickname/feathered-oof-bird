@@ -41,8 +41,8 @@ public interface ISecretProvider {
      * Returns the plaintext value for the given {@code key}, or {@link Optional#empty()} when the
      * key is not bound.
      *
-     * <p>Prefer {@link #getSecret(String)} when the secret is mandatory; use this overload only
-     * for truly optional secrets to avoid swallowing missing-configuration bugs.
+     * <p>Prefer {@link #getSecret(String)} when the secret is mandatory; use this overload only for
+     * truly optional secrets to avoid swallowing missing-configuration bugs.
      *
      * @param key the logical name of the secret
      * @return an {@link Optional} containing the value, or empty if absent

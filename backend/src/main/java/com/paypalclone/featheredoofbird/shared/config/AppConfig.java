@@ -22,7 +22,8 @@ import org.springframework.validation.annotation.Validated;
  * <h2>Adding new settings</h2>
  *
  * <ol>
- *   <li>Add a record component (or a nested record) here with the appropriate validation annotation.
+ *   <li>Add a record component (or a nested record) here with the appropriate validation
+ *       annotation.
  *   <li>Add the corresponding {@code app.<section>.<key>=${ENV_VAR:devDefault}} entry to {@code
  *       application.properties}.
  *   <li>Override with a safe dev placeholder in {@code application-dev.properties} if needed.

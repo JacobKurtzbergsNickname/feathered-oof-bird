@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
  * <p>This makes it an appropriate default for local development and any environment where secrets
  * are injected as environment variables (e.g. Kubernetes Secrets, Fly.io / Railway / Render secret
  * env-blocks, Docker {@code --env-file}). For production workloads requiring a dedicated secret
- * manager, replace this adapter with one backed by AWS Secrets Manager, HashiCorp Vault, or
- * similar — without changing any call-site code.
+ * manager, replace this adapter with one backed by AWS Secrets Manager, HashiCorp Vault, or similar
+ * — without changing any call-site code.
  *
  * <p>This class is intentionally package-private to prevent direct construction from other modules;
  * callers should depend on {@link ISecretProvider} only.

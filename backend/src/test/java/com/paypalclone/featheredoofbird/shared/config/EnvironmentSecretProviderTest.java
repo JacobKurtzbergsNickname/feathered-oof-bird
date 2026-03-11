@@ -112,8 +112,7 @@ class EnvironmentSecretProviderTest {
 
         @Test
         void isUncheckedException() {
-            assertThat(new SecretNotFoundException("x"))
-                    .isInstanceOf(RuntimeException.class);
+            assertThat(new SecretNotFoundException("x")).isInstanceOf(RuntimeException.class);
         }
     }
 }

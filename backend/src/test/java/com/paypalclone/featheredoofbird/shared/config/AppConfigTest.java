@@ -18,8 +18,7 @@ class AppConfigTest {
 
     /** Shared runner pre-loaded with only the configuration module under test. */
     private final ApplicationContextRunner runner =
-            new ApplicationContextRunner()
-                    .withUserConfiguration(AppConfigurationModule.class);
+            new ApplicationContextRunner().withUserConfiguration(AppConfigurationModule.class);
 
     // ── Happy path ────────────────────────────────────────────────────────────
 
@@ -102,9 +101,7 @@ class AppConfigTest {
 
         @Test
         void failsToStart_whenIssuerUriIsBlank() {
-            runner.withPropertyValues(
-                            "app.auth.issuer-uri=",
-                            "app.auth.audience=test-audience")
+            runner.withPropertyValues("app.auth.issuer-uri=", "app.auth.audience=test-audience")
                     .run(ctx -> assertThat(ctx).hasFailed());
         }
 
