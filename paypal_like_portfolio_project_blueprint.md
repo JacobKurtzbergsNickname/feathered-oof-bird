@@ -269,20 +269,7 @@ Communication: - REST internally - Event bus for async flows
 
 ------------------------------------------------------------------------
 
-# 6. Optional Advanced Enhancements
-
--   Multi-currency support
--   Scheduled payments
--   Subscription billing
--   Fraud scoring engine
--   Event sourcing
--   CQRS separation
--   Redis caching for balance projection
--   Kafka/RabbitMQ for event transport
-
-------------------------------------------------------------------------
-
-# 7. What This Project Demonstrates
+# 6. What This Project Demonstrates
 
 -   Domain-driven design principles
 -   Financial data integrity awareness
@@ -294,7 +281,7 @@ Communication: - REST internally - Event bus for async flows
 
 ------------------------------------------------------------------------
 
-# 8. Conclusion
+# 7. Conclusion
 
 A PayPal-like system is not about payment gateways. It is about:
 

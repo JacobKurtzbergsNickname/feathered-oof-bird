@@ -241,6 +241,324 @@
       "passes": false,
       "iterations_taken": 0,
       "blocked_reason": null
+    },
+    {
+      "id": "011",
+      "type": "feature",
+      "category": "quality",
+      "priority": "high",
+      "description": "Align transaction persistence with Money minor-units model",
+      "steps": [
+        "Replace BigDecimal amount fields with integer minor units in transaction persistence models",
+        "Validate and normalize currency code handling",
+        "Update Postgres and Mongo mappers to keep parity",
+        "Create and apply schema migration for amount column changes",
+        "Update and run persistence and integration tests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "006"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/application/TransactionServiceIntegrationTest.java",
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/infrastructure/persistence/TransactionRepositoryTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "012",
+      "type": "feature",
+      "category": "quality",
+      "priority": "high",
+      "description": "Enforce append-only financial records and remove hard-delete behavior",
+      "steps": [
+        "Remove or restrict DELETE transaction endpoint to non-production admin-only path",
+        "Represent cancellation as allowed state transition instead of row deletion",
+        "Block mutation of settled/completed financial records",
+        "Emit audit log entries for privileged maintenance actions",
+        "Add API tests proving immutability guarantees"
+      ],
+      "estimated_complexity": "small",
+      "depends_on": [
+        "010"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/infrastructure/TransactionControllerImmutabilityTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "013",
+      "type": "feature",
+      "category": "frontend",
+      "priority": "high",
+      "description": "Create authentication UI scaffold for registration and login",
+      "steps": [
+        "Create login and registration pages/components in frontend",
+        "Implement auth service and store for session/token state",
+        "Integrate register and login API calls with error handling",
+        "Protect authenticated routes and redirect unauthenticated users",
+        "Add frontend component/service tests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "003",
+        "004",
+        "005"
+      ],
+      "test_files": [
+        "frontend/src/components/__tests__/LoginForm.test.ts",
+        "frontend/src/components/__tests__/RegisterForm.test.ts"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "014",
+      "type": "feature",
+      "category": "frontend",
+      "priority": "medium",
+      "description": "Create admin panel UI scaffold for system status and basic admin views",
+      "steps": [
+        "Add admin route guarded by admin role checks",
+        "Render backend admin status endpoint output",
+        "Create initial admin dashboard layout for users and payments",
+        "Add admin API client service",
+        "Add frontend tests for role guard and admin status rendering"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "005"
+      ],
+      "test_files": [
+        "frontend/src/components/__tests__/AdminDashboard.test.ts"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "015",
+      "type": "feature",
+      "category": "frontend",
+      "priority": "high",
+      "description": "Create wallet balance and transaction history frontend view",
+      "steps": [
+        "Build wallet dashboard UI for available, pending, and held balances",
+        "Build paginated transaction history table with filters",
+        "Add wallet service methods for balance and history endpoints",
+        "Add currency formatting from minor units for display",
+        "Add frontend tests for dashboard and filtering behavior"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "009"
+      ],
+      "test_files": [
+        "frontend/src/components/__tests__/WalletDashboard.test.ts",
+        "frontend/src/components/__tests__/TransactionHistory.test.ts"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "016",
+      "type": "feature",
+      "category": "frontend",
+      "priority": "high",
+      "description": "Create P2P send money frontend flow scaffold",
+      "steps": [
+        "Create send-money form and confirmation UI",
+        "Add recipient lookup and validation behavior",
+        "Integrate payment submission service call",
+        "Show success and failure states with actionable messages",
+        "Add frontend tests for submit and validation flow"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "010"
+      ],
+      "test_files": [
+        "frontend/src/components/__tests__/SendMoneyForm.test.ts"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "017",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Add multi-currency wallet support",
+      "steps": [
+        "Support one wallet ledger account per currency",
+        "Enforce same-currency operations by default",
+        "Add mocked FX conversion path for allowed cross-currency transfers",
+        "Update balance responses to group totals per currency",
+        "Add migration and tests for multi-currency account scenarios"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "008",
+        "009"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/application/MultiCurrencyWalletServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "018",
+      "type": "feature",
+      "category": "infrastructure",
+      "priority": "medium",
+      "description": "Implement CQRS materialized balance projection",
+      "steps": [
+        "Define BalanceProjection read model",
+        "Update projection via domain events emitted from ledger writes",
+        "Add projection rebuild command from ledger history",
+        "Switch balance query path to projection with fallback behavior",
+        "Add projection consistency and rebuild tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "009"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/application/BalanceProjectionUpdaterTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "019",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Implement event sourcing mode for payment aggregate",
+      "steps": [
+        "Define payment domain event set",
+        "Create append-only payment event store",
+        "Reconstruct payment aggregate state from event stream",
+        "Optionally add snapshot optimization",
+        "Add deterministic replay tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "010"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/domain/PaymentAggregateReplayTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "020",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Add scheduled and recurring payments",
+      "steps": [
+        "Create ScheduledPayment model and recurrence rule types",
+        "Build scheduler job for due payment execution",
+        "Integrate due executions with payment flow",
+        "Add cancellation and retry behavior",
+        "Add scheduler and recurrence tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "010"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/application/ScheduledPaymentServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "021",
+      "type": "feature",
+      "category": "infrastructure",
+      "priority": "medium",
+      "description": "Add Redis cache layer for balance projections",
+      "steps": [
+        "Create balance cache service and key strategy",
+        "Update cache on ledger write events",
+        "Read balance from cache with fallback to source of truth",
+        "Add cache warm/rebuild process",
+        "Add cache hit/miss and fallback tests"
+      ],
+      "estimated_complexity": "medium",
+      "depends_on": [
+        "018"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/ledger/infrastructure/BalanceCacheServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "022",
+      "type": "feature",
+      "category": "infrastructure",
+      "priority": "medium",
+      "description": "Introduce async event bus via Kafka or RabbitMQ",
+      "steps": [
+        "Define event publisher port and broker adapters",
+        "Publish outbox/domain events to broker topics or exchanges",
+        "Wire consumer handlers for notifications, webhooks, and projections",
+        "Enforce idempotent consumption semantics",
+        "Add broker integration tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "018"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/shared/events/BrokerEventPublisherTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
+    },
+    {
+      "id": "023",
+      "type": "feature",
+      "category": "functional",
+      "priority": "medium",
+      "description": "Add merchant subscription billing",
+      "steps": [
+        "Create subscription plan and subscription models",
+        "Add plan creation and subscribe APIs",
+        "Run billing-cycle executions via scheduler",
+        "Add dunning and cancellation behavior",
+        "Add subscription billing tests"
+      ],
+      "estimated_complexity": "large",
+      "depends_on": [
+        "020"
+      ],
+      "test_files": [
+        "backend/src/test/java/com/paypalclone/featheredoofbird/payments/application/SubscriptionBillingServiceTest.java"
+      ],
+      "passes": false,
+      "iterations_taken": 0,
+      "blocked_reason": null
     }
   ]
 }
