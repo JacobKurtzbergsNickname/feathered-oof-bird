@@ -1,10 +1,8 @@
 package com.paypalclone.featheredoofbird.shared.config;
 
 import com.paypalclone.featheredoofbird.auth.AuthenticationStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,42 +13,28 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired(required = false)
-    private DevAuthenticationProvider devAuthenticationProvider;
+    private final AuthenticationStrategy authenticationStrategy;
 
-    @Autowired(required = false)
-    private AuthenticationStrategy authenticationStrategy;
-
-    @Bean
-    @Profile("dev")
-    @SuppressWarnings("unused")
-    SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        auth ->
-                                auth.requestMatchers("/public/**", "/actuator/health")
-                                        .permitAll()
-                                        .requestMatchers("/api/admin/**")
-                                        .hasRole("USER")
-                                        .requestMatchers("/api/**")
-                                        .authenticated()
-                                        .anyRequest()
-                                        .denyAll())
-                .authenticationProvider(devAuthenticationProvider)
-                .httpBasic(httpBasic -> httpBasic.disable());
-        return http.build();
+    public SecurityConfig(AuthenticationStrategy authenticationStrategy) {
+        this.authenticationStrategy = authenticationStrategy;
     }
 
     @Bean
-    @Profile("!dev")
     @SuppressWarnings("unused")
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers("/public/**", "/actuator/health")
+                                auth.requestMatchers(
+                                                "/",
+                                                "/index.html",
+                                                "/assets/**",
+                                                "/favicon.ico",
+                                                "/error",
+                                                "/public/**",
+                                                "/actuator/health",
+                                                "/api/auth/**")
                                         .permitAll()
                                         .requestMatchers("/api/admin/**")
                                         .hasAuthority("SCOPE_admin:all")
@@ -69,7 +53,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("!dev")
     @SuppressWarnings("unused")
     JwtDecoder jwtDecoder() {
         return authenticationStrategy.jwtDecoder();

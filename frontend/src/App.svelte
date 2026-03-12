@@ -1,7 +1,11 @@
 <script lang="ts">
   import { Button, Modal } from 'flowbite-svelte';
+  import AuthForm from './components/AuthForm.svelte';
   import TransactionList from './components/TransactionList.svelte';
   import TransactionForm from './components/TransactionForm.svelte';
+  import { authService } from './services/authService';
+  import { transactionService } from './services/transactionService';
+  import { authSession } from './stores/authStore';
   import type { Transaction } from './lib/types';
   import './app.css';
 
@@ -12,6 +16,11 @@
   let showModal = false;
   let editingTransaction: Transaction | null = null;
   let transactionListRef: TransactionListHandle | null = null;
+
+  function handleLogout() {
+    closeModal();
+    authService.logout();
+  }
 
   function openCreateModal() {
     editingTransaction = null;
@@ -38,7 +47,6 @@
   async function handleDelete(id: string) {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
-        const { transactionService } = await import('./services/transactionService');
         await transactionService.delete(id);
         if (transactionListRef) {
           await transactionListRef.loadTransactions();
@@ -51,29 +59,42 @@
   }
 </script>
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-  <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
-        PayPal Clone - Transaction Manager
-      </h1>
-      <Button color="blue" onclick={openCreateModal}>
-        Create Transaction
-      </Button>
-    </div>
+{#if !$authSession}
+  <AuthForm />
+{:else}
+  <div class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+      <div class="mb-8 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Signed In</p>
+          <h1 class="text-4xl font-bold text-gray-900">Transaction Manager</h1>
+          <p class="mt-2 text-sm text-slate-600">
+            {$authSession.user.email} · {$authSession.user.role}
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <Button color="blue" onclick={openCreateModal}>
+            Create Transaction
+          </Button>
+          <Button color="alternative" onclick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+      </div>
 
-    <TransactionList
-      bind:this={transactionListRef}
-      onEdit={openEditModal}
-      onDelete={handleDelete}
-    />
-
-    <Modal bind:open={showModal} size="lg" autoclose={false}>
-      <TransactionForm
-        transaction={editingTransaction}
-        onSuccess={handleFormSuccess}
-        onCancel={closeModal}
+      <TransactionList
+        bind:this={transactionListRef}
+        onEdit={openEditModal}
+        onDelete={handleDelete}
       />
-    </Modal>
+
+      <Modal bind:open={showModal} size="lg" autoclose={false}>
+        <TransactionForm
+          transaction={editingTransaction}
+          onSuccess={handleFormSuccess}
+          onCancel={closeModal}
+        />
+      </Modal>
+    </div>
   </div>
-</div>
+{/if}

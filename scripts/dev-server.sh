@@ -10,7 +10,7 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 echo "Starting database dependencies..."
-docker compose up -d postgres mongodb valkey
+docker compose up -d ooftish-postgres ooftish-mongo ooftish-valkey
 
 echo "Building frontend..."
 pushd "${ROOT_DIR}/frontend" >/dev/null
